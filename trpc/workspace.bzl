@@ -254,7 +254,7 @@ def trpc_workspace(path_prefix = "", repo_name = "", **kwargs):
     civetweb_ver = kwargs.get("civetweb_ver", "1.15")
     civetweb_sha256 = kwargs.get("civetweb_sha256", "90a533422944ab327a4fbb9969f0845d0dba05354f9cacce3a5005fa59f593b9")
     civetweb_urls = [
-        "https://mirrors.tencent.com/github.com/civetweb/civetweb/archive/v{ver}.tar.gz".format(ver = civetweb_ver),
+        "https://github.com/civetweb/civetweb/archive/v{ver}.tar.gz".format(ver = civetweb_ver),
         "https://github.com/civetweb/civetweb/archive/v{ver}.tar.gz".format(ver = civetweb_ver),
     ]
     http_archive(
@@ -293,7 +293,7 @@ def trpc_workspace(path_prefix = "", repo_name = "", **kwargs):
     nghttp2_sha256 = kwargs.get("nghttp2_sha256", "eb9d9046495a49dd40c7ef5d6c9907b51e5a6b320ea6e2add11eb8b52c982c47")
     nghttp2_name = "nghttp2-{ver}".format(ver = nghttp2_ver)
     nghttp2_urls = [
-        "https://mirrors.tencent.com/github.com/nghttp2/nghttp2/releases/download/v{ver}/nghttp2-{ver}.tar.gz".format(ver = nghttp2_ver),
+        "https://github.com/nghttp2/nghttp2/releases/download/v{ver}/nghttp2-{ver}.tar.gz".format(ver = nghttp2_ver),
         "https://github.com/nghttp2/nghttp2/releases/download/v{ver}/nghttp2-{ver}.tar.gz".format(ver = nghttp2_ver),
     ]
     http_archive(
