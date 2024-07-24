@@ -4,7 +4,7 @@ The server invocation relationship is as follows:
 
 client <---> server
 
-In common dir code, we implement thirdparty protocol.
+In common dir code, we implement demo protocol.
 
 ## Usage
 
