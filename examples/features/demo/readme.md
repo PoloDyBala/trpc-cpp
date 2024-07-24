@@ -1,4 +1,4 @@
-# demo Protocol Demo.
+# demo Protocol.
 
 The server invocation relationship is as follows:
 
