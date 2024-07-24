@@ -10,8 +10,8 @@ In common dir code, we implement demo protocol.
 
 We can use the following command to view the directory tree.
 ```shell
-$ tree examples/features/thirdparty_protocol/
-examples/features/thirdparty_protocol/
+$ tree examples/features/demo/
+examples/features/demo/
 ├── client
 │   ├── BUILD
 │   ├── client.cc
