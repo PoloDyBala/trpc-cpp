@@ -1,5 +1,6 @@
 #include "examples/helloworld/common/demo_client_codec.h"
 
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -10,6 +11,7 @@
 #include "trpc/util/buffer/zero_copy_stream.h"
 #include "trpc/util/likely.h"
 #include "trpc/util/log/logging.h"
+
 namespace examples::demo {
 
 using namespace trpc;
@@ -100,12 +102,6 @@ bool DemoClientCodec::FillRequest(const ::trpc::ClientContextPtr& context, const
     return encode_ret;
   }
 
-  // // 测试解码操作
-  // bool decode_ret = serialization->Deserialize(&data, type, body);
-  // if (decode_ret) {
-  //   std::cout << "解码成功" << std::endl;
-  // }
-
   auto compress_type = context->GetReqCompressType();
   bool compress_ret = compressor::CompressIfNeeded(compress_type, data, context->GetReqCompressLevel());
   if (TRPC_UNLIKELY(!compress_ret)) {
@@ -125,6 +121,30 @@ bool DemoClientCodec::FillRequest(const ::trpc::ClientContextPtr& context, const
 bool DemoClientCodec::ProcessTransparentReq(DemoRequestProtocol* req_protocol, void* body) {
   auto buf = *reinterpret_cast<NoncontiguousBuffer*>(body);
   req_protocol->SetNonContiguousProtocolBody(std::move(buf));
+  return true;
+}
+
+bool DemoClientCodec::FillResponse(const ::trpc::ClientContextPtr& ctx, const ::trpc::ProtocolPtr& in, void* body) {
+  TRPC_ASSERT(body);
+
+  auto* demo_rsp_protocol = static_cast<DemoResponseProtocol*>(in.get());
+  TRPC_ASSERT(demo_rsp_protocol);
+
+  auto rsp_body_data = demo_rsp_protocol->GetNonContiguousProtocolBody();
+
+  serialization::SerializationType serialization_type = ctx->GetRspEncodeType();
+  serialization::SerializationFactory* serializationfactory = serialization::SerializationFactory::GetInstance();
+  auto serialization = serializationfactory->Get(serialization_type);
+
+  serialization::DataType type = ctx->GetRspEncodeDataType();
+
+  bool decode_ret = serialization->Deserialize(&rsp_body_data, type, body);
+  if (!decode_ret) {
+    std::string error("trpc input pb response parese from array failed");
+    ctx->SetStatus(Status(GetDefaultClientRetCode(codec::ClientRetCode::DECODE_ERROR), 0, error));
+    return decode_ret;
+  }
+
   return true;
 }
 

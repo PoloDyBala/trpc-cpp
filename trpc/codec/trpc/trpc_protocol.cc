@@ -12,8 +12,8 @@
 //
 
 #include "trpc/codec/trpc/trpc_protocol.h"
-
 #include <arpa/inet.h>
+#include <iomanip>
 #include <iostream>
 #include "trpc/util/buffer/zero_copy_stream.h"
 #include "trpc/util/likely.h"
@@ -107,6 +107,7 @@ bool TrpcFixedHeader::Encode(char* buff) const {
 
 bool TrpcRequestProtocol::ZeroCopyDecode(NoncontiguousBuffer& buff) {
   std::cout << "调用TrpcRequestProtocol::ZeroCopyDecode" << std::endl;
+  std::cout << "开始" << static_cast<size_t>(buff.ByteSize()) << std::endl;
   if (TRPC_UNLIKELY(!fixed_header.Decode(buff))) {
     TRPC_LOG_ERROR("Decode fixed_header error.");
     return false;
@@ -130,8 +131,22 @@ bool TrpcRequestProtocol::ZeroCopyDecode(NoncontiguousBuffer& buff) {
       return false;
     }
 
+    std::cout << "cut之前" << static_cast<size_t>(buff.ByteSize()) << std::endl;
     req_body = buff.Cut(buff.ByteSize() - req_header.attachment_size());
+    std::cout << "cut之后" << static_cast<size_t>(buff.ByteSize()) << std::endl;
     req_attachment = std::move(buff);
+
+    std::cout << "ServerDecode" << std::endl;
+    for (const auto& block : req_body) {
+      for (std::size_t i = 0; i < block.size(); ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)(unsigned char)block.data()[i];
+        if ((i + 1) % 16 == 0)
+          std::cout << std::endl;  // 每16个字节换行
+        else
+          std::cout << " ";
+      }
+      std::cout << std::dec << std::endl;
+    }
     return true;
   } else {
     TRPC_LOG_ERROR("Decode req_header ParseFromZeroCopyStream error.");

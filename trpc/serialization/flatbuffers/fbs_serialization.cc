@@ -13,8 +13,8 @@
 
 #include "trpc/serialization/flatbuffers/fbs_serialization.h"
 
+#include <iostream>
 #include <string>
-
 #include "trpc/util/buffer/zero_copy_stream.h"
 #include "trpc/util/flatbuffers/message_fbs.h"
 #include "trpc/util/likely.h"
@@ -40,7 +40,7 @@ bool FbsSerialization::Serialize(DataType in_type, void* in, NoncontiguousBuffer
 
 bool FbsSerialization::Deserialize(NoncontiguousBuffer* in, DataType out_type, void* out) {
   TRPC_ASSERT(out_type == kFlatBuffers);
-
+  std::cout << "呵呵呵" << std::endl;
   auto* fbs_data = static_cast<flatbuffers::trpc::MessageFbs*>(out);
   if (in->size() == 1) {
     BufferView buffer_view = in->FirstContiguous();

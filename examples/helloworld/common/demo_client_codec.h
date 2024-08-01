@@ -39,7 +39,7 @@ class DemoClientCodec : public ::trpc::ClientCodec {
 
   bool FillRequest(const ::trpc::ClientContextPtr& ctx, const ::trpc::ProtocolPtr& in, void* body) override;
 
-  // bool FillResponse(const ::trpc::ClientContextPtr& ctx, const ::trpc::ProtocolPtr& in, void* body) override;
+  bool FillResponse(const ::trpc::ClientContextPtr& ctx, const ::trpc::ProtocolPtr& in, void* body) override;
 
   ::trpc::ProtocolPtr CreateRequestPtr() override;
 

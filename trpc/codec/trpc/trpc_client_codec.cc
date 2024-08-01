@@ -13,6 +13,7 @@
 
 #include "trpc/codec/trpc/trpc_client_codec.h"
 
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -89,6 +90,25 @@ bool TrpcClientCodec::FillRequest(const ClientContextPtr& context, const Protoco
     context->SetStatus(Status(GetDefaultClientRetCode(codec::ClientRetCode::ENCODE_ERROR), "encode failed."));
     return encode_ret;
   }
+
+  // 打印16进制
+  std::cout << "FillRequest" << std::endl;
+  for (const auto& block : data) {
+    for (std::size_t i = 0; i < block.size(); ++i) {
+      std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)(unsigned char)block.data()[i];
+      if ((i + 1) % 16 == 0)
+        std::cout << std::endl;  // 每16个字节换行
+      else
+        std::cout << " ";
+    }
+    std::cout << std::dec << std::endl;
+  }
+  std::cout << "尚未调用下面的解码操作" << std::endl;
+  // 测试解码操作
+  // bool decode_ret = serialization->Deserialize(&data, type, body);
+  // if (decode_ret) {
+  //   std::cout << "解码成功" << std::endl;
+  // }
 
   auto compress_type = context->GetReqCompressType();
   bool compress_ret = compressor::CompressIfNeeded(compress_type, data, context->GetReqCompressLevel());

@@ -1,5 +1,6 @@
 #include "examples/helloworld/common/demo_server_codec.h"
 
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -36,17 +37,14 @@ int DemoServerCodec::ZeroCopyCheck(const ::trpc::ConnectionPtr& conn, ::trpc::No
   memcpy(&method_name_length, ptr + 8, sizeof(method_name_length));
   func_ = std::string(ptr + 9, method_name_length);
   out.emplace_back(in.Cut(packet_size));
-  // while (true) {
-
-  // }
-
   return !out.empty() ? ::trpc::PacketChecker::PACKET_FULL : ::trpc::PacketChecker::PACKET_LESS;
 }
 
 bool DemoServerCodec::ZeroCopyDecode(const ::trpc::ServerContextPtr& ctx, std::any&& in, ::trpc::ProtocolPtr& out) {
   auto buff = std::any_cast<::trpc::NoncontiguousBuffer&&>(std::move(in));
   auto* req = static_cast<DemoRequestProtocol*>(out.get());
-  return req->ZeroCopyDecode(buff);
+  bool ret = req->ZeroCopyDecode(buff);
+  return ret;
 }
 
 bool DemoServerCodec::ZeroCopyEncode(const ::trpc::ServerContextPtr& ctx, ::trpc::ProtocolPtr& in,

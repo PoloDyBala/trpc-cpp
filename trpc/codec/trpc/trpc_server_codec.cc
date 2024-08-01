@@ -12,7 +12,7 @@
 //
 
 #include "trpc/codec/trpc/trpc_server_codec.h"
-
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -31,6 +31,19 @@ bool TrpcServerCodec::ZeroCopyDecode(const ServerContextPtr& context, std::any&&
   auto* req = static_cast<TrpcRequestProtocol*>(out.get());
   std::cout << "调用TrpcServerCodec::ZeroCopyDecode" << std::endl;
   std::cout << "这里的server context之前" << context->GetFuncName() << std::endl;
+
+  std::cout << "DemoServerCodec::ZeroCopyDecode序列化" << std::endl;
+  NoncontiguousBuffer& req_body1 = req->req_body;
+  for (const auto& block : req_body1) {
+    for (std::size_t i = 0; i < block.size(); ++i) {
+      std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)(unsigned char)block.data()[i];
+      if ((i + 1) % 16 == 0)
+        std::cout << std::endl;  // 每16个字节换行
+      else
+        std::cout << " ";
+    }
+    std::cout << std::dec << std::endl;
+  }
   bool ret = req->ZeroCopyDecode(buff);
   std::cout << "这里的server context" << context->GetFuncName() << std::endl;
 
@@ -63,6 +76,19 @@ bool TrpcServerCodec::ZeroCopyDecode(const ServerContextPtr& context, std::any&&
   // No response if it has a decoded failure.
   if (!ret) {
     context->SetResponseWhenDecodeFail(false);
+  }
+
+  std::cout << "DemoServerCodec::ZeroCopyDecode序列化1111" << std::endl;
+  NoncontiguousBuffer& req_body = req->req_body;
+  for (const auto& block : req_body) {
+    for (std::size_t i = 0; i < block.size(); ++i) {
+      std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)(unsigned char)block.data()[i];
+      if ((i + 1) % 16 == 0)
+        std::cout << std::endl;  // 每16个字节换行
+      else
+        std::cout << " ";
+    }
+    std::cout << std::dec << std::endl;
   }
 
   return ret;

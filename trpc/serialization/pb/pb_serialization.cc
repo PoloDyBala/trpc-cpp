@@ -13,8 +13,8 @@
 
 #include "trpc/serialization/pb/pb_serialization.h"
 
+#include <iomanip>
 #include <utility>
-
 #include "google/protobuf/message.h"
 
 #include "trpc/util/buffer/zero_copy_stream.h"
@@ -62,9 +62,6 @@ bool PbSerialization::Deserialize(NoncontiguousBuffer* in, DataType out_type, vo
 
   google::protobuf::Message* pb = static_cast<google::protobuf::Message*>(out);
   NoncontiguousBufferInputStream nbis(in);
-  size_t len = in->ByteSize();
-  TRPC_LOG_ERROR(len);
-
   if (TRPC_UNLIKELY(!pb->ParsePartialFromZeroCopyStream(&nbis))) {
     TRPC_LOG_ERROR("pb deserialize failed");
     return false;

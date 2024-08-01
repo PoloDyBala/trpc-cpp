@@ -1,11 +1,7 @@
 #include "examples/helloworld/common/demo_protocol.h"
 #include <arpa/inet.h>
+#include <iomanip>
 #include "trpc/util/buffer/noncontiguous_buffer.h"
-//   uint32_t packet_size{0};
-//   uint32_t packet_id{0};
-//   uint8_t method_name_length{0};
-//   std::string method_name;
-//   std::string req_data;
 
 namespace examples::demo {
 using namespace trpc;
@@ -27,7 +23,7 @@ bool DemoRequestProtocol::ZeroCopyDecode(::trpc::NoncontiguousBuffer& buff) {
     TRPC_LOG_ERROR("Buffer size is less than packet size.");
     return false;
   }
-
+  buff.Skip(9 + method_name_length);
   req_body = buff.Cut(packet_size - (9 + method_name_length));
   return true;
 }
@@ -61,8 +57,8 @@ bool DemoRequestProtocol::ZeroCopyEncode(NoncontiguousBuffer& buff) {
   // 将请求体数据追加到构建器中
   builder.Append(std::move(req_body));
   // 获取并返回构建好的缓冲区
-  buff = builder.DestructiveGet();
 
+  buff = builder.DestructiveGet();
   return true;
 }
 
@@ -86,6 +82,7 @@ bool DemoResponseProtocol::ZeroCopyDecode(::trpc::NoncontiguousBuffer& buff) {
     return false;
   }
 
+  buff.Skip(9);
   // 剩余数据作为响应体
   rsp_body = buff.Cut(packet_size - 9);  // 9 = 4字节包长度 + 4字节 packet_id + 1字节错误码
   return true;

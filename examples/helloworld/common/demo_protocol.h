@@ -26,25 +26,11 @@ class DemoRequestProtocol : public ::trpc::Protocol {
     return true;
   }
 
-  void SetFuncName(std::string func_name) override {
-    // std::cout << "调用DemoRequestProtocol::SetFuncName" << std::endl;
-    func_ = func_name;
-  }
-  const std::string& GetFuncName() const override {
-    // std::cout << "调用DemoRequestProtocol::GetFuncName" << std::endl;
-    // std::cout << "func_name::" << func_ << std::endl;
-    return func_;
-  }
+  void SetFuncName(std::string func_name) override { func_ = func_name; }
+  const std::string& GetFuncName() const override { return func_; }
 
-  void SetNonContiguousProtocolBody(NoncontiguousBuffer&& buff) override {
-    req_body = std::move(buff);
-    // std::cout << "调用DemoRequestProtocol::SetNonContiguousProtocolBody" << std::endl;
-  }
-  NoncontiguousBuffer GetNonContiguousProtocolBody() override {
-    // std::cout << "调用DemoRequestProtocol::GetNonContiguousProtocolBody" << std::endl;
-    // std::cout << "这里的得到的是什么大小" << static_cast<size_t>(req_body.ByteSize()) << std::endl;
-    return std::move(req_body);
-  }
+  void SetNonContiguousProtocolBody(NoncontiguousBuffer&& buff) override { req_body = std::move(buff); }
+  NoncontiguousBuffer GetNonContiguousProtocolBody() override { return std::move(req_body); }
 
  public:
   uint32_t packet_size{0};

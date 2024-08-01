@@ -28,7 +28,7 @@ namespace helloworld {
   TRPC_FMT_INFO("remote address: {}:{}", context->GetIp(), context->GetPort());
   TRPC_FMT_INFO("request message: {}", request->msg());
 
-  std::string response = "11";
+  std::string response = "Hello, " + request->msg();
   std::cout << "调用成功" << std::endl;
   reply->set_msg(response);
 

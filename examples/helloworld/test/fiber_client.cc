@@ -33,7 +33,7 @@ DEFINE_string(service_name, "trpc.test.helloworld.Greeter", "callee service name
 int DoRpcCall(const std::shared_ptr<::trpc::test::helloworld::GreeterServiceProxy>& proxy) {
   ::trpc::ClientContextPtr client_ctx = ::trpc::MakeClientContext(proxy);
   ::trpc::test::helloworld::HelloRequest req;
-  req.set_msg("f1111111");
+  req.set_msg("world");
   ::trpc::test::helloworld::HelloReply rsp;
   ::trpc::Status status = proxy->SayHello(client_ctx, req, &rsp);
   std::cout << "rsp" << rsp.msg() << std::endl;
