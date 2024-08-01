@@ -10,6 +10,13 @@ $ tree examples/helloworld
 examples/helloworld
 ├── BUILD
 ├── CMakeLists.txt
+├── common
+│   ├── demo_client_codec.cc
+│   ├── demo_client_codec.h
+│   ├── demo_server_codec.cc
+│   ├── demo_server_codec.h
+│   ├── demo_protocol.cc
+│   ├── demo_protocol.h
 ├── conf
 │   ├── trpc_cpp_fiber.yaml
 │   └── trpc_cpp.yaml
@@ -28,6 +35,7 @@ examples/helloworld
     │   └── trpc_cpp_future.yaml
     ├── fiber_client.cc
     └── future_client.cc
+
 ```
 
 We can use the following script to quickly compile and run a program.
@@ -77,7 +85,7 @@ The content of the output from the server program is as follows. You can check `
 [2023-08-08 12:05:51.913] [default] [info] [trpc_server.cc:173] Service trpc.test.helloworld.Greeter auto-start to listen ...
 [2023-08-08 12:05:51.913] [default] [info] [trpc_server.cc:173] Service  auto-start to listen ...
 [2023-08-08 12:05:52.816] [default] [info] [greeter_service.cc:37] remote address: 127.0.0.1:40639
-[2023-08-08 12:05:52.816] [default] [info] [greeter_service.cc:38] request message: fiber
+[2023-08-08 12:05:52.816] [default] [info] [greeter_service.cc:38] request message: world
 ```
 - server in thread runtime
 ```text
@@ -85,16 +93,16 @@ The content of the output from the server program is as follows. You can check `
 [2023-08-08 12:05:53.916] [default] [info] [trpc_server.cc:173] Service trpc.test.helloworld.Greeter auto-start to listen ...
 [2023-08-08 12:05:53.917] [default] [info] [trpc_server.cc:173] Service  auto-start to listen ...
 [2023-08-08 12:05:54.909] [default] [info] [greeter_service.cc:37] remote address: 127.0.0.1:40640
-[2023-08-08 12:05:54.909] [default] [info] [greeter_service.cc:38] request message: future
+[2023-08-08 12:05:54.909] [default] [info] [greeter_service.cc:38] request message: world
 ```
 
 The content of the output from the client program is as follows.
 
 - client in fiber runtime
 ```text
-get rsp msg: Hello, fiber
+get rsp msg: Hello, world
 ```
 - client in thread runtime
 ```text
-get rsp msg: Hello, future
+get rsp msg: Hello, world
 ```
