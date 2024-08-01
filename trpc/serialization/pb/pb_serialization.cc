@@ -50,8 +50,7 @@ bool PbSerialization::Serialize(DataType in_type, void* in, NoncontiguousBuffer*
       break;
     }
     default: {
-      TRPC_LOG_ERROR("serialization datatype:" << static_cast<int>(in_type)
-                                               << " has not implement.");
+      TRPC_LOG_ERROR("serialization datatype:" << static_cast<int>(in_type) << " has not implement.");
     }
   }
 
@@ -63,6 +62,8 @@ bool PbSerialization::Deserialize(NoncontiguousBuffer* in, DataType out_type, vo
 
   google::protobuf::Message* pb = static_cast<google::protobuf::Message*>(out);
   NoncontiguousBufferInputStream nbis(in);
+  size_t len = in->ByteSize();
+  TRPC_LOG_ERROR(len);
 
   if (TRPC_UNLIKELY(!pb->ParsePartialFromZeroCopyStream(&nbis))) {
     TRPC_LOG_ERROR("pb deserialize failed");

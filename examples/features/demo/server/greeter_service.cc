@@ -34,5 +34,19 @@ namespace demo {
   return ::trpc::kSuccStatus;
 }
 
+
+::trpc::Status GreeterServiceImpl::TestSelfProtocol(::trpc::ServerContextPtr context,
+                                            const ::trpc::examples::demo::HelloRequest* request,
+                                            ::trpc::examples::demo::HelloReply* reply) {
+  // Your can access more information from rpc context, eg: remote ip and port
+  TRPC_FMT_INFO("remote address: {}:{}", context->GetIp(), context->GetPort());
+  TRPC_FMT_INFO("request message: {}", request->msg());
+
+  std::string response = "Hello " + request->msg() + ". It is my own protocol.";
+  reply->set_msg(response);
+
+  return ::trpc::kSuccStatus;
+}
+
 }  // namespace helloworld
 }  // namespace test

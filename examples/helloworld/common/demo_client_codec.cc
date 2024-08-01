@@ -1,22 +1,20 @@
-#include "examples/features/demo/common/demo_client_codec.h"
+#include "examples/helloworld/common/demo_client_codec.h"
 
 #include <iostream>
 #include <memory>
 #include <utility>
-#include "examples/features/demo/common/demo_protocol.h"
+#include "examples/helloworld/common/demo_protocol.h"
 #include "trpc/codec/codec_helper.h"
 #include "trpc/compressor/trpc_compressor.h"
 #include "trpc/serialization/serialization_factory.h"
 #include "trpc/util/buffer/zero_copy_stream.h"
 #include "trpc/util/likely.h"
 #include "trpc/util/log/logging.h"
-
 namespace examples::demo {
 
 using namespace trpc;
 int DemoClientCodec::ZeroCopyCheck(const ::trpc::ConnectionPtr& conn, ::trpc::NoncontiguousBuffer& in,
                                    std::deque<std::any>& out) {
-  std::cout << "调用DemoClientCodec::ZeroCopyCheck" << std::endl;
   while (true) {
     uint32_t total_buff_size = in.ByteSize();
     // Checks buffer contains a full fixed header.
@@ -37,7 +35,6 @@ int DemoClientCodec::ZeroCopyCheck(const ::trpc::ConnectionPtr& conn, ::trpc::No
 
     uint32_t packet_size = 0;
     memcpy(&packet_size, ptr, sizeof(packet_size));
-    packet_size = ntohs(packet_size);
 
     if (total_buff_size < packet_size) {
       break;
@@ -50,18 +47,13 @@ int DemoClientCodec::ZeroCopyCheck(const ::trpc::ConnectionPtr& conn, ::trpc::No
 }
 
 bool DemoClientCodec::ZeroCopyDecode(const ::trpc::ClientContextPtr& ctx, std::any&& in, ::trpc::ProtocolPtr& out) {
-  std::cout << "调用DemoClientCodec::ZeroCopyDecode" << std::endl;
   auto buff = std::any_cast<::trpc::NoncontiguousBuffer&&>(std::move(in));
-  auto* rsp = static_cast<DemoResponseProtocol*>(out.get());
-
-  return rsp->ZeroCopyDecode(buff);
+  return out->ZeroCopyDecode(buff);
 }
 
 bool DemoClientCodec::ZeroCopyEncode(const ::trpc::ClientContextPtr& ctx, const ::trpc::ProtocolPtr& in,
                                      ::trpc::NoncontiguousBuffer& out) {
-  std::cout << "调用DemoClientCodec::ZeroCopyEncode" << std::endl;
   auto* req = static_cast<DemoRequestProtocol*>(in.get());
-
   return req->ZeroCopyEncode(out);
 }
 
@@ -76,7 +68,6 @@ uint32_t DemoClientCodec::GetSequenceId(const ::trpc::ProtocolPtr& rsp) const {
 
 bool DemoClientCodec::FillRequest(const ::trpc::ClientContextPtr& context, const ::trpc::ProtocolPtr& in, void* body) {
   TRPC_ASSERT(body);
-  std::cout << "调用DemoClientCodec::FillRequest" << std::endl;
 
   auto* demo_req_protocol = static_cast<DemoRequestProtocol*>(in.get());
   TRPC_ASSERT(demo_req_protocol);
@@ -89,6 +80,7 @@ bool DemoClientCodec::FillRequest(const ::trpc::ClientContextPtr& context, const
   serialization::SerializationType serialization_type = context->GetReqEncodeType();
   serialization::SerializationFactory* serializationfactory = serialization::SerializationFactory::GetInstance();
   auto serialization = serializationfactory->Get(serialization_type);
+  // std::cout << "这里序列化的类型是什么" << serialization_type << std::endl;
   if (serialization == nullptr) {
     std::string error_msg = "not support serialization_type:";
     error_msg += std::to_string(serialization_type);
@@ -108,28 +100,26 @@ bool DemoClientCodec::FillRequest(const ::trpc::ClientContextPtr& context, const
     return encode_ret;
   }
 
+  // // 测试解码操作
+  // bool decode_ret = serialization->Deserialize(&data, type, body);
+  // if (decode_ret) {
+  //   std::cout << "解码成功" << std::endl;
+  // }
+
   auto compress_type = context->GetReqCompressType();
   bool compress_ret = compressor::CompressIfNeeded(compress_type, data, context->GetReqCompressLevel());
   if (TRPC_UNLIKELY(!compress_ret)) {
     context->SetStatus(Status(GetDefaultClientRetCode(codec::ClientRetCode::ENCODE_ERROR), "compress failed."));
     return compress_ret;
   }
-  demo_req_protocol->SetNonContiguousProtocolBody(std::move(data));
 
   // 设置总体的pack_size, packet_id, method_name_length
   std::size_t serialized_size = data.ByteSize();
   demo_req_protocol->packet_size = 9 + serialized_size + demo_req_protocol->GetFuncName().size();
   demo_req_protocol->packet_id = 0;
   demo_req_protocol->method_name_length = demo_req_protocol->GetFuncName().size();
+  demo_req_protocol->SetNonContiguousProtocolBody(std::move(data));
   return true;
-}
-
-bool DemoClientCodec::FillResponse(const ::trpc::ClientContextPtr& ctx, const ::trpc::ProtocolPtr& in, void* body) {
-  std::cout << "调用TrpcClientCodec::FillResponse" << std::endl;
-  TRPC_ASSERT(body);
-
-  auto* trpc_rsp_protocol = static_cast<DemoResponseProtocol*>(in.get());
-  TRPC_ASSERT(trpc_rsp_protocol);
 }
 
 bool DemoClientCodec::ProcessTransparentReq(DemoRequestProtocol* req_protocol, void* body) {

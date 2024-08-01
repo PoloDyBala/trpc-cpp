@@ -14,6 +14,9 @@ cc_binary(
         ":helloworld_proto",
         "@com_github_fmtlib_fmt//:fmtlib",
         "@trpc_cpp//trpc/common:trpc_app",
+        "//examples/helloworld/common:demo_protocol",
+        "//examples/helloworld/common:demo_server_codec",
+        "@trpc_cpp//trpc/common:trpc_plugin",
     ],
 )
 

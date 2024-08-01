@@ -1,14 +1,15 @@
 #include "examples/features/demo/common/demo_server_codec.h"
 
+#include <iostream>
 #include <memory>
 #include <utility>
-
 #include "examples/features/demo/common/demo_protocol.h"
 
 namespace examples::demo {
 
 int DemoServerCodec::ZeroCopyCheck(const ::trpc::ConnectionPtr& conn, ::trpc::NoncontiguousBuffer& in,
                                    std::deque<std::any>& out) {
+  std::cout << "调用DemoServerCodec::ZeroCopyCheck" << std::endl;
   while (true) {
     uint32_t total_buff_size = in.ByteSize();
     // Checks buffer contains a full fixed header.
@@ -32,8 +33,6 @@ int DemoServerCodec::ZeroCopyCheck(const ::trpc::ConnectionPtr& conn, ::trpc::No
     // 网络为大端编码, 转换为主机字节序
     packet_size = ntohs(packet_size);
 
-
-
     if (total_buff_size < packet_size) {
       break;
     }
@@ -46,6 +45,7 @@ int DemoServerCodec::ZeroCopyCheck(const ::trpc::ConnectionPtr& conn, ::trpc::No
 
 bool DemoServerCodec::ZeroCopyDecode(const ::trpc::ServerContextPtr& ctx, std::any&& in, ::trpc::ProtocolPtr& out) {
   ctx->SetFuncName(::trpc::kNonRpcName);
+  std::cout << "调用DemoServerCodec::ZeroCopyDecode" << std::endl;
 
   auto buff = std::any_cast<::trpc::NoncontiguousBuffer&&>(std::move(in));
   auto* req = static_cast<DemoRequestProtocol*>(out.get());
@@ -55,17 +55,13 @@ bool DemoServerCodec::ZeroCopyDecode(const ::trpc::ServerContextPtr& ctx, std::a
 
 bool DemoServerCodec::ZeroCopyEncode(const ::trpc::ServerContextPtr& ctx, ::trpc::ProtocolPtr& in,
                                      ::trpc::NoncontiguousBuffer& out) {
+  std::cout << "调用DemoServerCodec::ZeroCopyEncode" << std::endl;
   auto* rsp = static_cast<DemoResponseProtocol*>(in.get());
-
   return rsp->ZeroCopyEncode(out);
 }
 
-::trpc::ProtocolPtr DemoServerCodec::CreateRequestObject() {
-  return std::make_shared<DemoRequestProtocol>();
-}
+::trpc::ProtocolPtr DemoServerCodec::CreateRequestObject() { return std::make_shared<DemoRequestProtocol>(); }
 
-::trpc::ProtocolPtr DemoServerCodec::CreateResponseObject() {
-  return std::make_shared<DemoResponseProtocol>();
-}
+::trpc::ProtocolPtr DemoServerCodec::CreateResponseObject() { return std::make_shared<DemoResponseProtocol>(); }
 
 }  // namespace examples::demo

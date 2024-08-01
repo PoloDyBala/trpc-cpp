@@ -13,10 +13,10 @@
 
 #pragma once
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <utility>
-
 #include "trpc/codec/protocol.h"
 #include "trpc/codec/trpc/trpc.pb.h"
 #include "trpc/util/buffer/noncontiguous_buffer.h"
@@ -88,8 +88,14 @@ class TrpcRequestProtocol : public Protocol {
 
   /// @brief Sets or Gets body payload of request protocol message.
   /// @note For "GetBody" function, the value of body will be moved, cannot be called repeatedly.
-  void SetNonContiguousProtocolBody(NoncontiguousBuffer&& buff) override { req_body = std::move(buff); }
-  NoncontiguousBuffer GetNonContiguousProtocolBody() override { return std::move(req_body); }
+  void SetNonContiguousProtocolBody(NoncontiguousBuffer&& buff) override {
+    std::cout << "调用TrpcRequestProtocol::SetNonContiguousProtocolBody" << std::endl;
+    req_body = std::move(buff);
+  }
+  NoncontiguousBuffer GetNonContiguousProtocolBody() override {
+    std::cout << "调用TrpcRequestProtocol::GetNonContiguousProtocolBody" << std::endl;
+    return std::move(req_body);
+  }
 
   /// @brief Sets or Gets attachment payload of request protocol message.
   /// @note For "GetAttachment" function, the value of body will be moved, cannot be called repeatedly.
@@ -119,8 +125,15 @@ class TrpcRequestProtocol : public Protocol {
   const std::string& GetCalleeName() const override { return req_header.callee(); }
 
   /// @brief  Set/Get function name of RPC.
-  void SetFuncName(std::string func_name) override { req_header.set_func(std::move(func_name)); }
-  const std::string& GetFuncName() const override { return req_header.func(); }
+  void SetFuncName(std::string func_name) override {
+    std::cout << "调用TrpcRequestProtocol::SetFuncName" << std::endl;
+    req_header.set_func(std::move(func_name));
+  }
+  const std::string& GetFuncName() const override {
+    std::cout << "调用TrpcRequestProtocol::GetFuncName" << std::endl;
+    std::cout << "func name:: " << req_header.func() << std::endl;
+    return req_header.func();
+  }
 
   /// @brief Set key-value pair (tans-info map).
   void SetKVInfo(std::string key, std::string value) override;

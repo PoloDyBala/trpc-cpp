@@ -17,8 +17,12 @@
 #include "fmt/format.h"
 
 #include "trpc/common/trpc_app.h"
+#include "trpc/common/trpc_plugin.h"
 
 #include "examples/helloworld/greeter_service.h"
+
+#include "examples/helloworld/common/demo_protocol.h"
+#include "examples/helloworld/common/demo_server_codec.h"
 
 namespace test {
 
@@ -26,6 +30,10 @@ namespace helloworld {
 
 class HelloWorldServer : public ::trpc::TrpcApp {
  public:
+  int RegisterPlugins() override {
+    ::trpc::TrpcPlugin::GetInstance()->RegisterServerCodec(std::make_shared<examples::demo::DemoServerCodec>());
+    return 0;
+  }
   int Initialize() override {
     const auto& config = ::trpc::TrpcConfig::GetInstance()->GetServerConfig();
     // Set the service name, which must be the same as the value of the `/server/service/name` configuration item

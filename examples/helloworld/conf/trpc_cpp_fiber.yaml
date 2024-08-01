@@ -15,10 +15,12 @@ server:
   admin_ip: 0.0.0.0
   service:
     - name: trpc.test.helloworld.Greeter
-      protocol: trpc                  # Application layer protocol, eg: trpc/http/...
+      disable_request_timeout: true
+      protocol: demo_protocol                  # Application layer protocol, eg: trpc/http/...
       network: tcp                    # Network type, Support two types: tcp/udp
       ip: 0.0.0.0                     # Service bind ip
-      port: 12345                     # Service bind port
+      port: 18888                     # Service bind port
+
 
 plugins:
   log:

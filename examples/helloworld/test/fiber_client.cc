@@ -16,12 +16,16 @@
 
 #include "gflags/gflags.h"
 
+#include <iostream>
+#include "examples/helloworld/helloworld.trpc.pb.h"
 #include "trpc/client/make_client_context.h"
 #include "trpc/client/trpc_client.h"
 #include "trpc/common/runtime_manager.h"
 #include "trpc/log/trpc_log.h"
 
-#include "examples/helloworld/helloworld.trpc.pb.h"
+#include "examples/helloworld/common/demo_client_codec.h"
+#include "examples/helloworld/common/demo_protocol.h"
+#include "trpc/common/trpc_plugin.h"
 
 DEFINE_string(client_config, "trpc_cpp.yaml", "framework client_config file, --client_config=trpc_cpp.yaml");
 DEFINE_string(service_name, "trpc.test.helloworld.Greeter", "callee service name");
@@ -29,9 +33,10 @@ DEFINE_string(service_name, "trpc.test.helloworld.Greeter", "callee service name
 int DoRpcCall(const std::shared_ptr<::trpc::test::helloworld::GreeterServiceProxy>& proxy) {
   ::trpc::ClientContextPtr client_ctx = ::trpc::MakeClientContext(proxy);
   ::trpc::test::helloworld::HelloRequest req;
-  req.set_msg("fiber");
+  req.set_msg("f1111111");
   ::trpc::test::helloworld::HelloReply rsp;
   ::trpc::Status status = proxy->SayHello(client_ctx, req, &rsp);
+  std::cout << "rsp" << rsp.msg() << std::endl;
   if (!status.OK()) {
     std::cerr << "get rpc error: " << status.ErrorMessage() << std::endl;
     return -1;
@@ -42,7 +47,7 @@ int DoRpcCall(const std::shared_ptr<::trpc::test::helloworld::GreeterServiceProx
 
 int Run() {
   auto proxy = ::trpc::GetTrpcClient()->GetProxy<::trpc::test::helloworld::GreeterServiceProxy>(FLAGS_service_name);
-
+  std::cout << "Flag service name" << FLAGS_service_name << std::endl;
   return DoRpcCall(proxy);
 }
 
@@ -70,5 +75,6 @@ int main(int argc, char* argv[]) {
 
   // If the business code is running in trpc pure client mode,
   // the business code needs to be running in the `RunInTrpcRuntime` function
+  ::trpc::TrpcPlugin::GetInstance()->RegisterClientCodec(std::make_shared<examples::demo::DemoClientCodec>());
   return ::trpc::RunInTrpcRuntime([]() { return Run(); });
 }

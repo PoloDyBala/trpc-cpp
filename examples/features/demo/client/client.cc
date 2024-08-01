@@ -28,63 +28,29 @@
 
 #include "examples/features/demo/server/helloworld.trpc.pb.h"
 
-DEFINE_string(target, "trpc.test.helloworld.demo_service", "callee service name");
-DEFINE_string(addr, "127.0.0.1:12347", "ip:port");
-DEFINE_string(client_config, "trpc_cpp_fiber.yaml", "");
+#include "trpc/log/trpc_log.h"
+DEFINE_string(client_config, "trpc_cpp_fiber.yaml",
+              "framework client_config file, --client_config=trpc_cpp_fiber.yaml");
+DEFINE_string(service_name, "trpc.examples.demo.demo_service", "callee service name");
 
-using namespace examples::demo;
-
-
-
-
-
-int Run() {
-  std::cout << "客户端处理了吗" << std::endl;
-  ::trpc::ServiceProxyOption option;
-
-  option.name = FLAGS_target;
-  option.codec_name = "demo_protocol";
-  option.network = "tcp";
-  option.conn_type = "long";
-  option.timeout = 1000;
-  option.selector_name = "direct";
-  option.target = FLAGS_addr;
-
-  auto proxy = ::trpc::GetTrpcClient()->GetProxy<::trpc::NonRpcServiceProxy>(FLAGS_target, option);
-
-  DemoRequestProtocolPtr req_ptr = std::make_shared<DemoRequestProtocol>();
-
-  std::cout << "请求协议开始封装" << std::endl;
-  req_ptr->packet_size = 20;
-  req_ptr->packet_id = 1;
-  req_ptr->method_name_length = 8;
-  req_ptr->method_name = "SayHello";
-
-  trpc::examples::demo::HelloRequest request;
-  request.set_msg("你好");
-  // 序列化 HelloReply 对象为字符串并存储在 rsp_data 中
-  if (!request.SerializeToString(&req_ptr->req_data)) {
-      std::cerr << "Failed to serialize response data." << std::endl;
-  }
-  std::cout << "请求协议封装完成" << std::endl;
-
-
-  DemoResponseProtocolPtr rsp_ptr = std::make_shared<DemoResponseProtocol>();
-
-  ::trpc::ClientContextPtr context = ::trpc::MakeClientContext(proxy, req_ptr, rsp_ptr);
-  context->SetTimeout(1000);
-
-  ::trpc::Status status =
-      proxy->UnaryInvoke<DemoRequestProtocolPtr, DemoResponseProtocolPtr>(context, req_ptr, rsp_ptr);
-
+int DoRpcCall(const std::shared_ptr<::trpc::examples::demo::GreeterServiceProxy>& proxy) {
+  ::trpc::ClientContextPtr client_ctx = ::trpc::MakeClientContext(proxy);
+  ::trpc::examples::demo::HelloRequest req;
+  req.set_msg("fiber");
+  ::trpc::examples::demo::HelloReply rsp;
+  ::trpc::Status status = proxy->SayHello(client_ctx, req, &rsp);
   if (!status.OK()) {
-    TRPC_FMT_ERROR("invoke error: {}", status.ErrorMessage());
+    std::cerr << "get rpc error: " << status.ErrorMessage() << std::endl;
     return -1;
   }
-
-  TRPC_FMT_INFO("response: {}", rsp_ptr->rsp_data);
-
+  std::cout << "get rsp msg: " << rsp.msg() << std::endl;
   return 0;
+}
+
+int Run() {
+  auto proxy = ::trpc::GetTrpcClient()->GetProxy<::trpc::examples::demo::GreeterServiceProxy>(FLAGS_service_name);
+
+  return DoRpcCall(proxy);
 }
 
 void ParseClientConfig(int argc, char* argv[]) {
@@ -96,7 +62,7 @@ void ParseClientConfig(int argc, char* argv[]) {
     exit(-1);
   }
 
-  std::cout << "FLAGS_target:" << FLAGS_target << std::endl;
+  std::cout << "FLAGS_service_name:" << FLAGS_service_name << std::endl;
   std::cout << "FLAGS_client_config:" << FLAGS_client_config << std::endl;
 
   int ret = ::trpc::TrpcConfig::GetInstance()->Init(FLAGS_client_config);
@@ -108,10 +74,6 @@ void ParseClientConfig(int argc, char* argv[]) {
 
 int main(int argc, char* argv[]) {
   ParseClientConfig(argc, argv);
-
-  ::trpc::TrpcPlugin::GetInstance()->RegisterClientCodec(
-      std::make_shared<examples::demo::DemoClientCodec>());
-  std::cout << "111" << std::endl;
 
   // If the business code is running in trpc pure client mode,
   // the business code needs to be running in the `RunInTrpcRuntime` function

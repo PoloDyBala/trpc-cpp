@@ -14,7 +14,7 @@
 #include "trpc/transport/client/fiber/conn_pool/fiber_tcp_conn_pool_connector_group.h"
 
 #include <cmath>
-
+#include <iostream>
 #include "trpc/coroutine/fiber_event.h"
 #include "trpc/stream/stream.h"
 #include "trpc/transport/client/fiber/common/fiber_client_connection_handler.h"
@@ -68,6 +68,7 @@ void FiberTcpConnPoolConnectorGroup::Destroy() {
 }
 
 int FiberTcpConnPoolConnectorGroup::SendRecv(CTransportReqMsg* req_msg, CTransportRspMsg* rsp_msg) {
+  std::cout << "调用SendRecv" << std::endl;
   int ret = TrpcRetCode::TRPC_CLIENT_NETWORK_ERR;
   RefPtr<FiberTcpConnPoolConnector> connector = GetOrCreate();
   if (connector != nullptr) {

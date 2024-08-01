@@ -14,7 +14,7 @@
 #include <functional>
 #include <memory>
 #include <string>
-
+#include <iostream>
 #include "trpc/common/trpc_app.h"
 #include "trpc/common/trpc_plugin.h"
 #include "trpc/log/trpc_log.h"
@@ -42,7 +42,9 @@ class DemoServiceImpl : public ::trpc::NonRpcServiceImpl {
                          const DemoRequestProtocol* in,
                          DemoResponseProtocol* out) {
     TRPC_FMT_INFO("request data: {}", in->req_data);
+    std::cout << "in :" << in-> packet_size << std::endl;
     out->rsp_data = in->req_data;
+    std::cout << "out :" << out-> packet_size << std::endl;
     return ::trpc::kSuccStatus;
   }
 };

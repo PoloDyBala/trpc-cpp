@@ -56,6 +56,10 @@ int Run() {
   ::trpc::Status status =
       proxy->UnaryInvoke<DemoRequestProtocolPtr, DemoResponseProtocolPtr>(context, req_ptr, rsp_ptr);
 
+
+  std::cout << "验证" << std::endl;
+  rsp_ptr->packet_size = 100;
+  std::cout << rsp_ptr->packet_size << std::endl;
   if (!status.OK()) {
     TRPC_FMT_ERROR("invoke error: {}", status.ErrorMessage());
     return -1;

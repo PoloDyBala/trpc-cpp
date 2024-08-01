@@ -13,9 +13,9 @@
 
 #include "trpc/codec/trpc/trpc_client_codec.h"
 
+#include <iostream>
 #include <memory>
 #include <utility>
-
 #include "trpc/codec/codec_helper.h"
 #include "trpc/codec/trpc/trpc_proto_checker.h"
 #include "trpc/codec/trpc/trpc_protocol.h"
@@ -31,17 +31,20 @@ int TrpcClientCodec::ZeroCopyCheck(const ConnectionPtr& conn, NoncontiguousBuffe
 }
 
 bool TrpcClientCodec::ZeroCopyDecode(const ClientContextPtr& context, std::any&& in, ProtocolPtr& out) {
+  std::cout << "调用TrpcClientCodec::ZeroCopyDecode" << std::endl;
   auto buf = std::any_cast<NoncontiguousBuffer&&>(std::move(in));
   return out->ZeroCopyDecode(buf);
 }
 
 bool TrpcClientCodec::ZeroCopyEncode(const ClientContextPtr& context, const ProtocolPtr& in, NoncontiguousBuffer& out) {
+  std::cout << "调用TrpcClientCodec::ZeroCopyEncode" << std::endl;
   auto* trpc_req = static_cast<TrpcRequestProtocol*>(in.get());
   FillTrpcRequestHeader(context, trpc_req);
   return trpc_req->ZeroCopyEncode(out);
 }
 
 void TrpcClientCodec::FillTrpcRequestHeader(const ClientContextPtr& context, TrpcRequestProtocol* req) {
+  std::cout << "调用TrpcClientCodec::FillTrpcRequestHeader" << std::endl;
   req->req_header.set_version(0);
   req->req_header.set_call_type(context->GetCallType());
   req->req_header.set_request_id(context->GetRequestId());
@@ -54,6 +57,7 @@ void TrpcClientCodec::FillTrpcRequestHeader(const ClientContextPtr& context, Trp
 }
 
 bool TrpcClientCodec::FillRequest(const ClientContextPtr& context, const ProtocolPtr& in, void* body) {
+  std::cout << "调用TrpcClientCodec::FillRequest" << std::endl;
   TRPC_ASSERT(body);
 
   auto* trpc_req_protocol = static_cast<TrpcRequestProtocol*>(in.get());
@@ -64,6 +68,7 @@ bool TrpcClientCodec::FillRequest(const ClientContextPtr& context, const Protoco
   }
 
   serialization::SerializationType serialization_type = context->GetReqEncodeType();
+  std::cout << "这里序列化的类型是什么" << serialization_type << std::endl;
   serialization::SerializationFactory* serializationfactory = serialization::SerializationFactory::GetInstance();
   auto serialization = serializationfactory->Get(serialization_type);
   if (serialization == nullptr) {
@@ -92,7 +97,6 @@ bool TrpcClientCodec::FillRequest(const ClientContextPtr& context, const Protoco
     return compress_ret;
   }
   trpc_req_protocol->SetNonContiguousProtocolBody(std::move(data));
-
   return true;
 }
 
@@ -102,6 +106,7 @@ void TrpcClientCodec::FillResponseContext(const ClientContextPtr& context, TrpcR
 }
 
 bool TrpcClientCodec::FillResponse(const ClientContextPtr& context, const ProtocolPtr& in, void* body) {
+  std::cout << "调用TrpcClientCodec::FillResponse" << std::endl;
   TRPC_ASSERT(body);
 
   auto* trpc_rsp_protocol = static_cast<TrpcResponseProtocol*>(in.get());
@@ -167,6 +172,7 @@ bool TrpcClientCodec::ProcessTransparentReq(TrpcRequestProtocol* req_protocol, v
 bool TrpcClientCodec::ProcessTransparentRsp(TrpcResponseProtocol* rsp_protocol, void* body) {
   auto* rsp_bin = reinterpret_cast<NoncontiguousBuffer*>(body);
   *rsp_bin = rsp_protocol->GetNonContiguousProtocolBody();
+  std::cout << "111111" << static_cast<size_t>(rsp_bin->ByteSize()) << std::endl;
   return true;
 }
 

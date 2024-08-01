@@ -13,6 +13,7 @@
 
 #include "examples/features/thirdparty_protocol/common/demo_client_codec.h"
 
+#include <iostream>
 #include <memory>
 #include <utility>
 
@@ -23,6 +24,7 @@ namespace examples::thirdparty_protocol {
 int DemoClientCodec::ZeroCopyCheck(const ::trpc::ConnectionPtr& conn, ::trpc::NoncontiguousBuffer& in,
                                    std::deque<std::any>& out) {
   while (true) {
+    std::cout << "这里开始调用" << std::endl;
     uint32_t total_buff_size = in.ByteSize();
     // Checks buffer contains a full fixed header.
     if (total_buff_size < 4) {
@@ -64,17 +66,17 @@ bool DemoClientCodec::ZeroCopyEncode(const ::trpc::ClientContextPtr& ctx, const 
   return req->ZeroCopyEncode(out);
 }
 
-::trpc::ProtocolPtr DemoClientCodec::CreateRequestPtr() {
-  return std::make_shared<DemoRequestProtocol>();
-}
+::trpc::ProtocolPtr DemoClientCodec::CreateRequestPtr() { return std::make_shared<DemoRequestProtocol>(); }
 
-::trpc::ProtocolPtr DemoClientCodec::CreateResponsePtr() {
-  return std::make_shared<DemoResponseProtocol>();
-}
+::trpc::ProtocolPtr DemoClientCodec::CreateResponsePtr() { return std::make_shared<DemoResponseProtocol>(); }
 
 uint32_t DemoClientCodec::GetSequenceId(const ::trpc::ProtocolPtr& rsp) const {
   auto* rsp_msg = static_cast<DemoResponseProtocol*>(rsp.get());
   return rsp_msg->packet_id;
+}
+
+bool DemoClientCodec::FillRequest(const ::trpc::ClientContextPtr& ctx, const ::trpc::ProtocolPtr& in, void* body) {
+  
 }
 
 }  // namespace examples::thirdparty_protocol

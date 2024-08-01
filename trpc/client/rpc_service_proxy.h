@@ -13,9 +13,9 @@
 
 #pragma once
 
+#include <iostream>
 #include <string>
 #include <utility>
-
 #include "rapidjson/document.h"
 
 #include "trpc/client/client_context.h"
@@ -183,7 +183,6 @@ class RpcServiceProxy : public ServiceProxy {
 template <class RequestMessage, class ResponseMessage>
 Status RpcServiceProxy::UnaryInvoke(const ClientContextPtr& context, const RequestMessage& req, ResponseMessage* rsp) {
   TRPC_ASSERT(context->GetRequest() != nullptr);
-
   // Set the corresponding encoding based on the types of the request and response.
   if (TRPC_UNLIKELY(!(SetMessageEncodeType<RequestMessage, ResponseMessage>)(context))) {
     return context->GetStatus();
@@ -208,7 +207,7 @@ Status RpcServiceProxy::UnaryInvoke(const ClientContextPtr& context, const Reque
   context->SetResponseData(nullptr);
 
   context->SetEndTimestampUs(trpc::time::GetMicroSeconds());
-
+  // std::cout << "状态" << context.GetStatus() << std::endl;
   return context->GetStatus();
 }
 
@@ -229,10 +228,9 @@ void RpcServiceProxy::UnaryInvokeImp(const ClientContextPtr& context, const Requ
 
     return;
   }
-
   ProtocolPtr& rsp_protocol = context->GetResponse();
-  Status unary_invoke_status = ServiceProxy::UnaryInvoke(context, req_protocol, rsp_protocol);
 
+  Status unary_invoke_status = ServiceProxy::UnaryInvoke(context, req_protocol, rsp_protocol);
   if (TRPC_UNLIKELY(!unary_invoke_status.OK())) {
     return;
   }

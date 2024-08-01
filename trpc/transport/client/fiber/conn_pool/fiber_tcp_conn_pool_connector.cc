@@ -13,6 +13,7 @@
 
 #include "trpc/transport/client/fiber/conn_pool/fiber_tcp_conn_pool_connector.h"
 
+#include <iostream>
 #include <limits>
 #include <mutex>
 #include <utility>
@@ -203,7 +204,7 @@ void FiberTcpConnPoolConnector::SendReqMsg(CTransportReqMsg* req_msg) { Send(req
 
 void FiberTcpConnPoolConnector::Send(CTransportReqMsg* req_msg) {
   TRPC_ASSERT(connection_ != nullptr);
-
+  std::cout << "调用Send" << std::endl;
   if (options_.trans_info->run_client_filters_function) {
     options_.trans_info->run_client_filters_function(FilterPoint::CLIENT_PRE_SCHED_SEND_MSG, req_msg);
     options_.trans_info->run_client_filters_function(FilterPoint::CLIENT_POST_SCHED_SEND_MSG, req_msg);

@@ -9,16 +9,16 @@ global:
         concurrency_hint: 8
 
 server:
-  app: test
-  server: helloworld
-  admin_port: 18888
+  app: examples
+  server: demo
+  admin_port: 8888                    # Start server with admin service which can manage service
   admin_ip: 0.0.0.0
   service:
-    - name: trpc.test.helloworld.demo_service
-      protocol: demo_protocol
-      network: tcp
-      ip: 0.0.0.0
-      port: 12347
+    - name: trpc.examples.demo.demo_service
+      protocol: demo_protocol                  # Application layer protocol, eg: trpc/http/...
+      network: tcp                    # Network type, Support two types: tcp/udp
+      ip: 0.0.0.0                     # Service bind ip
+      port: 12345                     # Service bind port
 
 plugins:
   log:
@@ -26,4 +26,4 @@ plugins:
       - name: default
         sinks:
           local_file:
-            filename: demo.log
+            filename: helloworld_fiber.log

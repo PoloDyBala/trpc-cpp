@@ -7,14 +7,18 @@ global:
         # In a Numa architecture, the workers will be automatically grouped (8-15 cores per group),
         # while in Uma architecture, they will not be grouped.
         concurrency_hint: 8
+        scheduling_group_size: 4
 
 client:
   service:
     - name: trpc.test.helloworld.Greeter
-      target: 127.0.0.1:12345       # Fullfill ip:port list here when use `direct` selector.(such as 23.9.0.1:90,34.5.6.7:90)
-      protocol: trpc                # Application layer protocol, eg: trpc/http/...
+      target: 127.0.0.1:18888       # Fullfill ip:port list here when use `direct` selector.(such as 23.9.0.1:90,34.5.6.7:90)
+      protocol: demo_protocol                # Application layer protocol, eg: trpc/http/...
       network: tcp                  # Network type, Support two types: tcp/udp
+      timeout: 3000
+      conn_type: long
       selector_name: direct         # Selector plugin, default `direct`, it is used when you want to access via ip:port
+
 
 plugins:
   log:

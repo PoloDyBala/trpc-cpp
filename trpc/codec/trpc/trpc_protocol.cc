@@ -14,7 +14,7 @@
 #include "trpc/codec/trpc/trpc_protocol.h"
 
 #include <arpa/inet.h>
-
+#include <iostream>
 #include "trpc/util/buffer/zero_copy_stream.h"
 #include "trpc/util/likely.h"
 #include "trpc/util/log/logging.h"
@@ -22,6 +22,7 @@
 namespace trpc {
 
 bool TrpcFixedHeader::Decode(NoncontiguousBuffer& buff, bool skip) {
+  std::cout << "调用TrpcFixedHeader::Decode" << std::endl;
   if (TRPC_UNLIKELY(buff.ByteSize() < TrpcFixedHeader::TRPC_PROTO_PREFIX_SPACE)) {
     TRPC_FMT_ERROR("buff.ByteSize:{} less than {}", buff.ByteSize(), TrpcFixedHeader::TRPC_PROTO_PREFIX_SPACE);
     return false;
@@ -72,6 +73,7 @@ bool TrpcFixedHeader::Decode(NoncontiguousBuffer& buff, bool skip) {
 }
 
 bool TrpcFixedHeader::Encode(char* buff) const {
+  std::cout << "调用TrpcFixedHeader::Encode" << std::endl;
   if (TRPC_UNLIKELY(!buff)) {
     TRPC_LOG_ERROR("Encode buff null error.");
     return false;
@@ -104,6 +106,7 @@ bool TrpcFixedHeader::Encode(char* buff) const {
 }
 
 bool TrpcRequestProtocol::ZeroCopyDecode(NoncontiguousBuffer& buff) {
+  std::cout << "调用TrpcRequestProtocol::ZeroCopyDecode" << std::endl;
   if (TRPC_UNLIKELY(!fixed_header.Decode(buff))) {
     TRPC_LOG_ERROR("Decode fixed_header error.");
     return false;
@@ -137,6 +140,7 @@ bool TrpcRequestProtocol::ZeroCopyDecode(NoncontiguousBuffer& buff) {
 }
 
 bool TrpcRequestProtocol::ZeroCopyEncode(NoncontiguousBuffer& buff) {
+  std::cout << "调用TrpcRequestProtocol::ZeroCopyEncode" << std::endl;
   req_header.set_attachment_size(req_attachment.ByteSize());
   auto pb_header_size = req_header.ByteSizeLong();
   fixed_header.pb_header_size = pb_header_size;
@@ -171,19 +175,16 @@ void TrpcRequestProtocol::SetKVInfo(std::string key, std::string value) {
   (*trans_info)[std::move(key)] = std::move(value);
 }
 
-const TransInfoMap& TrpcRequestProtocol::GetKVInfos() const {
-  return req_header.trans_info();
-}
+const TransInfoMap& TrpcRequestProtocol::GetKVInfos() const { return req_header.trans_info(); }
 
 google::protobuf::Map<std::string, std::string>* TrpcRequestProtocol::GetMutableKVInfos() {
   return req_header.mutable_trans_info();
 }
 
-uint32_t TrpcRequestProtocol::GetMessageSize() const {
-  return fixed_header.data_frame_size;
-}
+uint32_t TrpcRequestProtocol::GetMessageSize() const { return fixed_header.data_frame_size; }
 
 bool TrpcResponseProtocol::ZeroCopyDecode(NoncontiguousBuffer& buff) {
+  std::cout << "调用TrpcResponseProtocol::ZeroCopyDncode" << std::endl;
   if (TRPC_UNLIKELY(!fixed_header.Decode(buff))) {
     TRPC_LOG_ERROR("Decode fixed_header error.");
     return false;
@@ -211,6 +212,7 @@ bool TrpcResponseProtocol::ZeroCopyDecode(NoncontiguousBuffer& buff) {
 }
 
 bool TrpcResponseProtocol::ZeroCopyEncode(NoncontiguousBuffer& buff) {
+  std::cout << "调用TrpcResponseProtocol::ZeroCopyEncode" << std::endl;
   rsp_header.set_attachment_size(rsp_attachment.ByteSize());
   uint32_t rsp_header_size = rsp_header.ByteSizeLong();
   uint32_t buff_size =
@@ -248,17 +250,13 @@ void TrpcResponseProtocol::SetKVInfo(std::string key, std::string value) {
   (*trans_info)[std::move(key)] = std::move(value);
 }
 
-const TransInfoMap& TrpcResponseProtocol::GetKVInfos() const {
-  return rsp_header.trans_info();
-}
+const TransInfoMap& TrpcResponseProtocol::GetKVInfos() const { return rsp_header.trans_info(); }
 
 google::protobuf::Map<std::string, std::string>* TrpcResponseProtocol::GetMutableKVInfos() {
   return rsp_header.mutable_trans_info();
 }
 
-uint32_t TrpcResponseProtocol::GetMessageSize() const {
-  return fixed_header.data_frame_size;
-}
+uint32_t TrpcResponseProtocol::GetMessageSize() const { return fixed_header.data_frame_size; }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -267,9 +265,8 @@ namespace {
 // @brief Reports whether type of data-frame is ok.
 bool CheckTrpcDataFrameType(const TrpcFixedHeader& fixed_header, const TrpcDataFrameType& expect) {
   if (TRPC_UNLIKELY(expect != fixed_header.data_frame_type)) {
-    TRPC_LOG_ERROR("invalid data frame type"
-                   << ", expect:" << static_cast<int>(expect)
-                   << ", actual:" << static_cast<uint32_t>(fixed_header.data_frame_type) << ".");
+    TRPC_LOG_ERROR("invalid data frame type" << ", expect:" << static_cast<int>(expect) << ", actual:"
+                                             << static_cast<uint32_t>(fixed_header.data_frame_type) << ".");
     return false;
   }
   return true;
@@ -280,9 +277,8 @@ namespace {
 // @brief Reports whether type of streaming-frame is ok.
 bool CheckTrpcStreamFrameType(const TrpcFixedHeader& fixed_header, const TrpcStreamFrameType& expect) {
   if (TRPC_UNLIKELY(expect != fixed_header.stream_frame_type)) {
-    TRPC_LOG_ERROR("invalid stream frame type"
-                   << ", expect:" << static_cast<int>(expect)
-                   << ", actual:" << static_cast<uint32_t>(fixed_header.stream_frame_type) << ".");
+    TRPC_LOG_ERROR("invalid stream frame type" << ", expect:" << static_cast<int>(expect) << ", actual:"
+                                               << static_cast<uint32_t>(fixed_header.stream_frame_type) << ".");
     return false;
   }
   return true;
@@ -292,7 +288,7 @@ bool CheckTrpcStreamFrameType(const TrpcFixedHeader& fixed_header, const TrpcStr
 namespace {
 // @brief Encodes streaming frame protocol message. It is available for frame of INIT, CLOSE, FEEDBACK.
 bool EncodeStreamFrame(const TrpcFixedHeader& fixed_header, const google::protobuf::Message& pb,
-                              NoncontiguousBufferBuilder* builder) {
+                       NoncontiguousBufferBuilder* builder) {
   auto* header_buffer = builder->Reserve(fixed_header.ByteSizeLong());
 
   if (TRPC_UNLIKELY(!fixed_header.Encode(header_buffer))) {
@@ -313,8 +309,7 @@ bool EncodeStreamFrame(const TrpcFixedHeader& fixed_header, const google::protob
 
 namespace {
 // @brief Decodes streaming frame, It is available for frame of INIT, CLOSE, FEEDBACK.
-bool DecodeStreamFrame(NoncontiguousBuffer* buffer, TrpcFixedHeader* fixed_header,
-                              google::protobuf::Message* pb) {
+bool DecodeStreamFrame(NoncontiguousBuffer* buffer, TrpcFixedHeader* fixed_header, google::protobuf::Message* pb) {
   if (TRPC_UNLIKELY(!fixed_header->Decode(*buffer))) {
     TRPC_LOG_ERROR("decode fixed header of stream frame failed.");
     return false;

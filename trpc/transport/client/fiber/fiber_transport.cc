@@ -13,6 +13,7 @@
 
 #include "trpc/transport/client/fiber/fiber_transport.h"
 
+#include <iostream>
 #include <string>
 
 #include "trpc/coroutine/fiber.h"
@@ -49,9 +50,8 @@ int FiberTransport::SendRecv(CTransportReqMsg* req_msg, CTransportRspMsg* rsp_ms
       if (connector_group != nullptr) {
         return connector_group->SendRecv(req_msg, rsp_msg);
       }
-
       TRPC_FMT_ERROR("Can't get connector group of {}:{}", req_msg->context->GetNodeAddr().ip,
-                                                           req_msg->context->GetNodeAddr().port);
+                     req_msg->context->GetNodeAddr().port);
       return TrpcRetCode::TRPC_INVOKE_UNKNOWN_ERR;
     }
 
@@ -79,7 +79,7 @@ int FiberTransport::SendRecvFromOutSide(CTransportReqMsg* req_msg, CTransportRsp
 
 int FiberTransport::SendRecvForBackupRequest(CTransportReqMsg* req_msg, CTransportRspMsg* rsp_msg) {
   int ret_code = TrpcRetCode::TRPC_INVOKE_UNKNOWN_ERR;
-
+  std::cout << "执行这里，拿到数据看了吗" << std::endl;
   BackupRequestRetryInfo* backup_info = req_msg->context->GetBackupRequestRetryInfo();
   backup_info->IncrCount();
 
@@ -148,7 +148,7 @@ Future<CTransportRspMsg> FiberTransport::AsyncSendRecv(CTransportReqMsg* req_msg
       }
 
       TRPC_FMT_ERROR("Can't get connector group of {}:{}", req_msg->context->GetNodeAddr().ip,
-                                                           req_msg->context->GetNodeAddr().port);
+                     req_msg->context->GetNodeAddr().port);
       return MakeExceptionFuture<CTransportRspMsg>(
           CommonException("not found connector group.", TrpcRetCode::TRPC_INVOKE_UNKNOWN_ERR));
     }
@@ -192,7 +192,7 @@ int FiberTransport::SendOnly(CTransportReqMsg* req_msg) {
       ret = connector_group->SendOnly(req_msg);
     } else {
       TRPC_FMT_ERROR("Can't get connector group of {}:{}", req_msg->context->GetNodeAddr().ip,
-                                                           req_msg->context->GetNodeAddr().port);
+                     req_msg->context->GetNodeAddr().port);
       ret = TrpcRetCode::TRPC_INVOKE_UNKNOWN_ERR;
     }
 

@@ -12,7 +12,7 @@
 //
 
 #include "trpc/transport/client/fiber/conn_complex/fiber_tcp_conn_complex_connector_group.h"
-
+#include <iostream>
 #include "trpc/coroutine/fiber_event.h"
 #include "trpc/stream/stream.h"
 #include "trpc/transport/client/fiber/common/fiber_client_connection_handler.h"
@@ -147,8 +147,8 @@ stream::StreamReaderWriterProviderPtr FiberTcpConnComplexConnectorGroup::CreateS
     stream::StreamOptions&& stream_options) {
   RefPtr<FiberTcpConnComplexConnector> connector = GetOrCreate();
   if (connector == nullptr) {
-    TRPC_LOG_ERROR("create stream failed due to get connection failed"
-                   << ", ip:" << options_.peer_addr.Ip() << ", port:" << options_.peer_addr.Port());
+    TRPC_LOG_ERROR("create stream failed due to get connection failed" << ", ip:" << options_.peer_addr.Ip()
+                                                                       << ", port:" << options_.peer_addr.Port());
     return nullptr;
   }
 

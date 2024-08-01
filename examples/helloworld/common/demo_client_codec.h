@@ -17,16 +17,17 @@
 #include <deque>
 #include <string>
 
+#include "examples/helloworld/common/demo_protocol.h"
 #include "trpc/client/client_context.h"
 #include "trpc/codec/client_codec.h"
 
-namespace examples::thirdparty_protocol {
-
+namespace examples::demo {
+using namespace trpc;
 class DemoClientCodec : public ::trpc::ClientCodec {
  public:
   ~DemoClientCodec() override = default;
 
-  std::string Name() const override { return "thirdpary_protocol"; }
+  std::string Name() const override { return "demo_protocol"; }
 
   int ZeroCopyCheck(const ::trpc::ConnectionPtr& conn, ::trpc::NoncontiguousBuffer& in,
                     std::deque<std::any>& out) override;
@@ -37,6 +38,7 @@ class DemoClientCodec : public ::trpc::ClientCodec {
                       ::trpc::NoncontiguousBuffer& out) override;
 
   bool FillRequest(const ::trpc::ClientContextPtr& ctx, const ::trpc::ProtocolPtr& in, void* body) override;
+
   // bool FillResponse(const ::trpc::ClientContextPtr& ctx, const ::trpc::ProtocolPtr& in, void* body) override;
 
   ::trpc::ProtocolPtr CreateRequestPtr() override;
@@ -46,6 +48,9 @@ class DemoClientCodec : public ::trpc::ClientCodec {
   uint32_t GetSequenceId(const ::trpc::ProtocolPtr& rsp) const override;
 
   bool IsComplex() const override { return true; }
+
+ private:
+  bool ProcessTransparentReq(DemoRequestProtocol* req_protocol, void* body);
 };
 
-}  // namespace examples::thirdparty_protocol
+}  // namespace examples::demo

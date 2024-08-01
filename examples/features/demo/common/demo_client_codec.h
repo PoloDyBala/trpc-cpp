@@ -17,11 +17,12 @@
 #include <deque>
 #include <string>
 
+#include "examples/features/demo/common/demo_protocol.h"
 #include "trpc/client/client_context.h"
 #include "trpc/codec/client_codec.h"
 
 namespace examples::demo {
-
+using namespace trpc;
 class DemoClientCodec : public ::trpc::ClientCodec {
  public:
   ~DemoClientCodec() override = default;
@@ -36,8 +37,9 @@ class DemoClientCodec : public ::trpc::ClientCodec {
   bool ZeroCopyEncode(const ::trpc::ClientContextPtr& ctx, const ::trpc::ProtocolPtr& in,
                       ::trpc::NoncontiguousBuffer& out) override;
 
-  // bool FillRequest(const ::trpc::ClientContextPtr& ctx, const ::trpc::ProtocolPtr& in, void* body) override;
-  // bool FillResponse(const ::trpc::ClientContextPtr& ctx, const ::trpc::ProtocolPtr& in, void* body) override;
+  bool FillRequest(const ::trpc::ClientContextPtr& ctx, const ::trpc::ProtocolPtr& in, void* body) override;
+
+  bool FillResponse(const ::trpc::ClientContextPtr& ctx, const ::trpc::ProtocolPtr& in, void* body) override;
 
   ::trpc::ProtocolPtr CreateRequestPtr() override;
 
@@ -46,6 +48,9 @@ class DemoClientCodec : public ::trpc::ClientCodec {
   uint32_t GetSequenceId(const ::trpc::ProtocolPtr& rsp) const override;
 
   bool IsComplex() const override { return true; }
+
+ private:
+  bool ProcessTransparentReq(DemoRequestProtocol* req_protocol, void* body);
 };
 
-} 
+}  // namespace examples::demo

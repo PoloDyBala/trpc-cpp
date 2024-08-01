@@ -13,9 +13,9 @@
 
 #include "trpc/codec/trpc/trpc_server_codec.h"
 
+#include <iostream>
 #include <memory>
 #include <utility>
-
 #include "trpc/codec/trpc/trpc_proto_checker.h"
 #include "trpc/codec/trpc/trpc_protocol.h"
 #include "trpc/util/log/logging.h"
@@ -29,8 +29,10 @@ int TrpcServerCodec::ZeroCopyCheck(const ConnectionPtr& conn, NoncontiguousBuffe
 bool TrpcServerCodec::ZeroCopyDecode(const ServerContextPtr& context, std::any&& in, ProtocolPtr& out) {
   auto buff = std::any_cast<NoncontiguousBuffer&&>(std::move(in));
   auto* req = static_cast<TrpcRequestProtocol*>(out.get());
-
+  std::cout << "调用TrpcServerCodec::ZeroCopyDecode" << std::endl;
+  std::cout << "这里的server context之前" << context->GetFuncName() << std::endl;
   bool ret = req->ZeroCopyDecode(buff);
+  std::cout << "这里的server context" << context->GetFuncName() << std::endl;
 
   if (ret) {
     context->SetTimeout(req->req_header.timeout());
@@ -67,15 +69,18 @@ bool TrpcServerCodec::ZeroCopyDecode(const ServerContextPtr& context, std::any&&
 }
 
 bool TrpcServerCodec::ZeroCopyEncode(const ServerContextPtr& context, ProtocolPtr& in, NoncontiguousBuffer& out) {
+  std::cout << "调用TrpcServerCodec::ZeroCopyEncode" << std::endl;
   ProtocolPtr req_msg = context->GetRequestMsg();
   auto* req = static_cast<TrpcRequestProtocol*>(req_msg.get());
   auto* rsp = static_cast<TrpcResponseProtocol*>(in.get());
-
+  // 验证这里是否已经有数据了
+  std::cout << "验证这里是否已经有数据了" << static_cast<size_t>(rsp->rsp_body.ByteSize()) << std::endl;
   rsp->rsp_header.set_version(req->req_header.version());
   rsp->rsp_header.set_call_type(static_cast<TrpcCallType>(context->GetCallType()));
   rsp->rsp_header.set_request_id(context->GetRequestId());
 
   int ret_code = context->GetStatus().GetFrameworkRetCode();
+  std::cout << "他这里的ret_code" << ret_code << std::endl;
   rsp->rsp_header.set_ret(ret_code);
   rsp->rsp_header.set_func_ret(context->GetStatus().GetFuncRetCode());
   rsp->rsp_header.set_error_msg(context->GetStatus().ErrorMessage());

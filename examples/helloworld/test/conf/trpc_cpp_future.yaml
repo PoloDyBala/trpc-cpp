@@ -13,10 +13,11 @@ global:
 client:
   service:
     - name: trpc.test.helloworld.Greeter
-      target: 127.0.0.1:12345       # Fullfill comma-separated ip:port list here when use `direct` selector.(such as 23.9.0.1:90,34.5.6.7:90)
-      protocol: trpc                # Application layer protocol, eg: trpc/http/...
+      target: 127.0.0.1:18888       # Fullfill comma-separated ip:port list here when use `direct` selector.(such as 23.9.0.1:90,34.5.6.7:90)
+      protocol: demo_protocol                # Application layer protocol, eg: trpc/http/...
       network: tcp                  # Network type, Support two types: tcp/udp
       selector_name: direct         # Selector plugin, default `direct`, it is used when you want to access via ip:port
+      request_timeout_check_interval: 1000
 
 plugins:
   log:

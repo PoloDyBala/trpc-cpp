@@ -23,6 +23,10 @@ public:
   ::trpc::Status SayHello(::trpc::ServerContextPtr context,
                           const ::trpc::examples::demo::HelloRequest* request,
                           ::trpc::examples::demo::HelloReply* reply) override;
+
+  ::trpc::Status TestSelfProtocol(::trpc::ServerContextPtr context,
+                          const ::trpc::examples::demo::HelloRequest* request,
+                          ::trpc::examples::demo::HelloReply* reply) override;
 };
 
 }  // namespace helloworld

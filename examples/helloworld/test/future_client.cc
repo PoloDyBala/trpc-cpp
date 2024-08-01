@@ -24,6 +24,10 @@
 
 #include "examples/helloworld/helloworld.trpc.pb.h"
 
+#include "examples/helloworld/common/demo_client_codec.h"
+#include "examples/helloworld/common/demo_protocol.h"
+#include "trpc/common/trpc_plugin.h"
+
 DEFINE_string(client_config, "trpc_cpp.yaml", "framework client_config file, --client_config=trpc_cpp.yaml");
 DEFINE_string(service_name, "trpc.test.helloworld.Greeter", "callee service name");
 
@@ -32,8 +36,8 @@ int DoAsyncRpcCall(const std::shared_ptr<::trpc::test::helloworld::GreeterServic
   ::trpc::test::helloworld::HelloRequest req;
   req.set_msg("future");
   bool succ = true;
-  auto fut = proxy->AsyncSayHello(client_ctx, req)
-      .Then([&succ](::trpc::Future<::trpc::test::helloworld::HelloReply>&& fut) {
+  auto fut =
+      proxy->AsyncSayHello(client_ctx, req).Then([&succ](::trpc::Future<::trpc::test::helloworld::HelloReply>&& fut) {
         if (fut.IsReady()) {
           auto rsp = fut.GetValue0();
           std::cout << "get rsp msg: " << rsp.msg() << std::endl;
@@ -50,7 +54,7 @@ int DoAsyncRpcCall(const std::shared_ptr<::trpc::test::helloworld::GreeterServic
 
 int Run() {
   auto proxy = ::trpc::GetTrpcClient()->GetProxy<::trpc::test::helloworld::GreeterServiceProxy>(FLAGS_service_name);
-
+  ::trpc::TrpcPlugin::GetInstance()->RegisterClientCodec(std::make_shared<examples::demo::DemoClientCodec>());
   return DoAsyncRpcCall(proxy);
 }
 
@@ -79,5 +83,6 @@ int main(int argc, char* argv[]) {
   // If the business code is running in trpc pure client mode,
   // the business code needs to be running in the `RunInTrpcRuntime` function
   // This function can be seen as a program entry point and should be called only once.
+  ::trpc::TrpcPlugin::GetInstance()->RegisterClientCodec(std::make_shared<examples::demo::DemoClientCodec>());
   return ::trpc::RunInTrpcRuntime([]() { return Run(); });
 }

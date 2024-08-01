@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <cassert>
 #include <deque>
+#include <iostream>
 #include <memory>
 #include <utility>
 
@@ -206,6 +207,7 @@ void ServiceProxy::UnaryTransportInvoke(const ClientContextPtr& context, const P
     rsp = std::any_cast<ProtocolPtr&&>(std::move(rsp_msg.msg));
     return;
   }
+  std::cout << req << std::endl;
 
   std::string error("service name:");
   error += GetServiceName();
